@@ -1,6 +1,10 @@
 const myShip = document.querySelector('.player-shooter')
 const playArea = document.querySelector('#main-play-area')
 const enemiesShips = ['images/nave1.png', 'images/nave2.png', 'images/nave3.png']
+const instructionsText = document.querySelector('.game-instructions')
+const startButton = document.querySelector('.start-button')
+let shipInterval;
+
 
 function flyShip(event) {
     if(event.key === 'ArrowUp') {
@@ -21,7 +25,7 @@ function moveUp(){
         return
     }else{
         let position = parseInt(topPosition);
-        position -= 50;
+        position -=50;
         myShip.style.top = `${position}px`
     }
 }
@@ -32,7 +36,7 @@ function moveDown(){
         return
     }else{
         let position = parseInt(topPosition);
-        position += 50;
+        position +=50;
         myShip.style.top = `${position}px`
     }
 }
@@ -61,7 +65,7 @@ function moveLaser(laser){
 
         ships.forEach((ships) =>{
             if(checkLaserCollision(laser, ships)){
-                ships.src = "/images/explosao.png"
+                ships.src = "images/explosao.png"
                 ships.classList.remove('ships');
                 ships.classList.add('dead-ship');
             }
@@ -82,34 +86,34 @@ function createEnemiesShips(){
     newEnemieShip.classList.add('ships');
     newEnemieShip.classList.add('ships-transition');
     newEnemieShip.style.left = '370px';
-    newEnemieShip.style.top = `${Math.floor(Math.random() * 300) + 30}px`;
+    newEnemieShip.style.top = `${Math.floor(Math.random() * 300) + 40}px`;
     playArea.appendChild(newEnemieShip);
     moveShip(newEnemieShip);
 }
 
-function moveShip(ship){
-    let moveShipInterval = setInterval(()=>{
-        let xPosition = parseInt(window.getComputedStyle(ship).getPropertyValue('left'))
+function moveShip(ships){
+    let moveshipInterval = setInterval(()=>{
+        let xPosition = parseInt(window.getComputedStyle(ships).getPropertyValue('left'))
         if(xPosition <=50){
-            if(Array.from(ship.classList).includes('dead-ship')){
-                ship.remove();
+            if(Array.from(ships.classList).includes('dead-ship')){
+                ships.remove();
             }else{
                 gameOver();
             }
         }else{
-            ship.style.left = `${xPosition - 4}px`
+            ships.style.left = `${xPosition - 4}px`
         }
     }, 30);
 }
 
 
-function checkLaserCollision(laser, ship){
+function checkLaserCollision(laser, ships){
     let laserTop = parseInt(laser.style.top);
     let laserLeft = parseInt(laser.style.left);
     let laserBottom = laserTop - 20;
 
-    let shipTop = parseInt(ship.style.top);
-    let shipLeft = parseInt(ship.style.left);
+    let shipTop = parseInt(ships.style.top);
+    let shipLeft = parseInt(ships.style.left);
     let shipBottom = shipTop - 30;
     if(laserLeft !=340 && laserLeft + 40 >= shipLeft){
         if(laserTop <= shipTop && laserTop >= shipBottom){
@@ -120,10 +124,38 @@ function checkLaserCollision(laser, ship){
     }else{
         return false;
     }
+}
 
+startButton.addEventListener('click', (event) =>{
+    playGame();
+})
+
+function playGame(){
+    startButton.style.display = 'none';
+    instructionsText.style.display = 'none';
+    window.addEventListener('keydown', flyShip);
+    shipInterval = setInterval(()=>{
+        createEnemiesShips();
+    },2000)
+}
+
+
+
+function gameOver(){
+    window.removeEventListener('keydown', flyShip);
+    clearInterval(shipInterval);
+    let ships = document.querySelectorAll('.ships');
+    ships.forEach((ship) => ship.remove());
+    let lasers = document.querySelectorAll('.laser');
+    lasers.forEach((laser) => laser.remove());
+    setTimeout(() =>{
+        alert('Game Over!')
+        myShip.style.top = '250px';
+        startButton.style.display ='block';
+        instructionsText.style.display ='block';
+
+    })
 
 }
 
 
-window.addEventListener('keydown', flyShip)
-createEnemiesShips()
